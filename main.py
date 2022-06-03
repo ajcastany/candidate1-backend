@@ -87,8 +87,8 @@ class DailyForm(db.Model):
     tag_ret: bool
     
     id = db.Column(db.Integer, primary_key=True)
-    day = db.Column(db.DATE, nullable=false)
-    name = db.Column(db.Integer, db.ForeignKey('staff.id' ), nullable=false)
+    day = db.Column(db.DATE, nullable=False)
+    name = db.Column(db.Integer, db.ForeignKey('staff.id' ), nullable=False)
     room = db.Column(db.String, nullable=True)
     time_in = db.Column(db.TIME, nullable=True)
     time_out = db.Column(db.TIME, nullable=True)
