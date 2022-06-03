@@ -1,14 +1,7 @@
 #!/usr/bin python3
 
 from dataclasses import dataclass
-from time import time
-from psycopg2 import Time
-
-from sqlalchemy import TIME, ForeignKey, true
-from main import app
-from flask_sqlalchemy import SQLAlchemy
-
-db = SQLAlchemy()
+from main import db
 
 @dataclass
 class Staff(db.Model):
@@ -19,26 +12,31 @@ class Staff(db.Model):
     name: str
     department: str
     
-    id = db.Column(db.Integer, primary_key=True, auto_increment=True)
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
     department = db.Column(db.String(50), nullable=False)
+    #id = db.relationship('DailyForm', lazy=True)
+        
     
 @dataclass
-class DailyForm(db.model):
+class DailyForm(db.Model):
     __tablename__ = "daily_form"
     
     id: int
-    name: str
+    name: int
     room: str
-    time_in: TIME
-    time_out: TIME
+    time_in: db.TIME
+    time_out: db.TIME
     tag: str
     tag_ret: bool
     
-    id = db.Column(db.Integer, primary_key=True, auto_increment=True)
-    name = db.relationship('Staff', ForeignKey("staff.id"))
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.relationship(db.Integer, foreign_keys='Staff.id' )
+    #name = db.relationship('Staff')
     room = db.Column(db.String, nullable=True)
     time_in = db.Column(db.TIME, nullable=True)
     time_out = db.Column(db.TIME, nullable=True)
     tag = db.Column(db.String, nullable=True)
-    tag_ret = db.Column(db.Bool, nullable=True)
+    tag_ret = db.Column(db.Boolean, nullable=True)
+    
+    
