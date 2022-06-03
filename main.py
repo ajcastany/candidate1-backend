@@ -79,7 +79,7 @@ class Staff(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
     department = db.Column(db.String(50), nullable=False)
-    fk = db.relationship('DailyForm', lazy='dynamic', primaryjoin="DailyForm.name == Staff.id")
+    fk = db.relationship('DailyForm', lazy='dynamic')
             
     
 @dataclass
@@ -181,13 +181,11 @@ def daily_form(day):
 @app.route('/api/all_days')
 def all_days():
     day_form = DailyForm.query.join(Staff, DailyForm.name==Staff.id)\
-    .add_columns(DailyForm.id, DailyForm.day, Staff.name, Staff.department, 
-                     DailyForm.room, DailyForm.time_in, DailyForm.time_out, 
-                     DailyForm.tag, DailyForm.tag).all()
+    .add_columns(Staff.name, Staff.department).all()
     form_tup = [tuple(row) for row in day_form]
     form_tup_b = [item[1::] for item in form_tup]
     
-    return jsonify(form_tup_b)
+    return jsonify(form_tup)
         
         
 
