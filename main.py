@@ -10,12 +10,6 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import false
 
 """
-VARIABLES
-"""
-
-conn_dict = dict()
-
-"""
 FUNCTIONS
 """
 
@@ -32,18 +26,6 @@ def read_config(file_path):
     return (dictionary)
 
 
-"""
-DEF
-"""
-
-""" def db_conn():
-    db_dict = read_config("db_conn.config")
-    conn = psycopg2.connect(dbname=db_dict['db'], host=db_dict['host'],
-                            user=db_dict['username'], password=db_dict['password'], port=db_dict['port'])
-    print("conn success!!")
-    conn.close()
-    print("Connection terminated!")
- """
 """
 MAIN
 """
