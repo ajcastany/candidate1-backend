@@ -1,11 +1,14 @@
 #!/usr/bin/python3
 import configparser
 from dataclasses import dataclass
+from doctest import FAIL_FAST
+import json
 import psycopg2
 from typing import Dict, List
 from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import false
+from flask_marshmallow import Marshmallow
 
 
 """
@@ -52,12 +55,17 @@ conf_dict = read_config("db_conn.config")
 app.config.update(
     ENV='development',
     SQLALCHEMY_DATABASE_URI=conf_dict['server_uri'],
-    SQLALCHEMY_TRACK_MODIFICATIONS= False
+    SQLALCHEMY_TRACK_MODIFICATIONS= False,
+    JSON_SORT_KEYS = False
     )
 
 
 db = SQLAlchemy(app)
+ma = Marshmallow(app)
 
+"""
+Models:
+"""
 @dataclass
 class Staff(db.Model):
     """From an answer on SO: https://stackoverflow.com/questions/5022066/how-to-serialize-sqlalchemy-result-to-json"""
@@ -96,12 +104,65 @@ class DailyForm(db.Model):
     tag_ret = db.Column(db.Boolean, nullable=True)
     
 
+"""
+Mashmallow Schemas
+"""
 
+class DailyFormSchema(ma.SQLAlchemySchema):
+    class Meta:
+        model = DailyForm
+        include_fk = True
+
+class StaffSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Staff
+
+"""
+Initialize Marshmallow Schemas
+"""
+
+daily_form_schema = DailyFormSchema()     
+staff_schema = StaffSchema()  
+
+
+"""
+Routes:
+"""
     
 @app.route('/api', methods=['GET'])
 def TEST():
     test = Staff.query.first()
-    return jsonify(test)
+    return staff_schema.dump(test)
+
+@app.route('/api/staff/<id>', methods=['GET'])
+def staff(id):
+    try:
+        staff = Staff.query.filter_by(id=id).first()
+        return staff_schema.dump(staff)
+    except:
+        return not_found("resource not found")
+
+@app.route('/api/daily_form/<day>', methods=['GET'])
+def daily_form(day):
+    try:
+        daily_form_schema = DailyFormSchema()
+        day_form = DailyForm.query.join(Staff, name=Staff.id)\
+            .add_columns(Staff.name, Staff.department).filter_by(day=day).all()
+            #.join(Staff)\
+            #.filter_by(day=day).all()
+        return jsonify(day_form)
+    except:
+        return "Resource not found"
+    
+@app.route('/api/all_days')
+def all_days():
+    day_form = DailyForm.query.join(Staff)\
+        .add_columns(DailyForm.id, Staff.name, Staff.department, 
+                     DailyForm.room, DailyForm.time_in, DailyForm.time_out, 
+                     DailyForm.tag, DailyForm.tag).all()
+    print(day_form)
+    return daily_form_schema.dump(day_form)
+        
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
