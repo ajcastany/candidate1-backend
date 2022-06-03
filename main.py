@@ -1,16 +1,12 @@
 #!/usr/bin/python3
 import configparser
 from dataclasses import dataclass
-from doctest import FAIL_FAST
-import json
 from operator import itemgetter
 import psycopg2
 from typing import Dict, List
 from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import false
-from flask_marshmallow import Marshmallow
-
 
 """
 VARIABLES
@@ -62,7 +58,6 @@ app.config.update(
 
 
 db = SQLAlchemy(app)
-ma = Marshmallow(app)
 
 """
 Models:
@@ -106,70 +101,25 @@ class DailyForm(db.Model):
     
 
 """
-Mashmallow Schemas
-"""
-
-class DailyFormSchema(ma.SQLAlchemySchema):
-    class Meta:
-        model = DailyForm
-        include_fk = True
-
-class StaffSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = Staff
-class AllDaysSchema(ma.Schema):
-    pass
-    
-from sqlalchemy.ext.declarative import DeclarativeMeta
-
-class AlchemyEncoder(json.JSONEncoder):
-
-    def default(self, obj):
-        if isinstance(obj.__class__, DeclarativeMeta):
-            # an SQLAlchemy class
-            fields = {}
-            for field in [x for x in dir(obj) if not x.startswith('_') and x != 'metadata']:
-                data = obj.__getattribute__(field)
-                try:
-                    json.dumps(data) # this will fail on non-encodable values, like other classes
-                    fields[field] = data
-                except TypeError:
-                    fields[field] = None
-            # a json-encodable dict
-            return fields
-
-        return json.JSONEncoder.default(self, obj)
-
-"""
-Initialize Marshmallow Schemas
-"""
-
-daily_form_schema = DailyFormSchema()     
-staff_schema = StaffSchema()
-all_days_schema = AllDaysSchema()
-
-
-"""
 Routes:
 """
     
 @app.route('/api', methods=['GET'])
 def TEST():
     test = Staff.query.first()
-    return staff_schema.dump(test)
+    return jsonify(test)
 
 @app.route('/api/staff/<id>', methods=['GET'])
 def staff(id):
     try:
         staff = Staff.query.filter_by(id=id).first()
-        return staff_schema.dump(staff)
+        return jsonify(staff)
     except:
-        return not_found("resource not found")
+        return ("resource not found")
 
 @app.route('/api/daily_form/<day>', methods=['GET'])
 def daily_form(day):
     try:
-        daily_form_schema = DailyFormSchema()
         day_form = DailyForm.query.join(Staff, DailyForm.name==Staff.id)\
             .add_columns(Staff.name, Staff.department).filter_by(day=day).all()
             #.join(Staff)\
