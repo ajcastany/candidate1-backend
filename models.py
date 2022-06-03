@@ -15,8 +15,8 @@ class Staff(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
     department = db.Column(db.String(50), nullable=False)
-    #id = db.relationship('DailyForm', lazy=True)
-        
+    fk = db.relationship('DailyForm', lazy='dynamic', primaryjoin="DailyForm.name == Staff.id")
+            
     
 @dataclass
 class DailyForm(db.Model):
@@ -31,12 +31,10 @@ class DailyForm(db.Model):
     tag_ret: bool
     
     id = db.Column(db.Integer, primary_key=True)
-    name = db.relationship(db.Integer, foreign_keys='Staff.id' )
-    #name = db.relationship('Staff')
+    name = db.Column(db.Integer, db.ForeignKey('staff.id' ))
     room = db.Column(db.String, nullable=True)
     time_in = db.Column(db.TIME, nullable=True)
     time_out = db.Column(db.TIME, nullable=True)
     tag = db.Column(db.String, nullable=True)
     tag_ret = db.Column(db.Boolean, nullable=True)
-    
     
