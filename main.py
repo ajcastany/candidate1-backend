@@ -2,6 +2,9 @@
 import configparser
 import psycopg2
 from typing import Dict, List
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import false
 
 """
 VARIABLES
@@ -27,9 +30,8 @@ def read_config(file_path):
 
 
 """
-MAIN
+DEF
 """
-
 
 def db_conn():
     db_dict = read_config("db_conn.config")
@@ -37,12 +39,26 @@ def db_conn():
                             user=db_dict['username'], password=db_dict['password'], port=db_dict['port'])
     print("conn success!!")
     conn.close()
-    print("done!")
+    print("Connection terminated!")
 
+"""
+MAIN
+"""
 
-def main():
-    db_conn()
+app = Flask(__name__)
+conf_dict = read_config("db_conn.config")
+app.config.update(
+    ENV='development',
+    SQLALCHEMY_DATABASE_URI=conf_dict['server_uri'],
+    SQLALCHEMY_TRACK_MODIFICATIONS= False
+    )
+
+db = SQLAlchemy(app)
+    
+@app.route('/api', methods=['GET'])
+def TEST():
+    pass
 
 
 if __name__ == '__main__':
-    main()
+    app.run(host='0.0.0.0')
