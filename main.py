@@ -1,9 +1,7 @@
 #!/usr/bin/python3
-import sys
 import configparser
 from dataclasses import dataclass
 from operator import itemgetter
-import psycopg2
 from typing import Dict, List
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
