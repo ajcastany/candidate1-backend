@@ -23,6 +23,7 @@ class DailyForm(db.Model):
     __tablename__ = "daily_form"
     
     id: int
+    day: db.DATE
     name: int
     room: str
     time_in: db.TIME
@@ -31,7 +32,8 @@ class DailyForm(db.Model):
     tag_ret: bool
     
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Integer, db.ForeignKey('staff.id' ))
+    day = db.Column(db.DATE, nullable=False)
+    name = db.Column(db.Integer, db.ForeignKey('staff.id' ), nullable=False)
     room = db.Column(db.String, nullable=True)
     time_in = db.Column(db.TIME, nullable=True)
     time_out = db.Column(db.TIME, nullable=True)
