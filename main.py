@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import sys
 import configparser
 from dataclasses import dataclass
 from operator import itemgetter
@@ -104,9 +105,9 @@ class DailyForm(db.Model):
 Routes:
 """
     
-@app.route('/api', methods=['GET'])
-def TEST():
-    test = Staff.query.first()
+@app.route('/api/staff/all', methods=['GET'])
+def all_staff():
+    test = Staff.query.all()
     return jsonify(test)
 
 @app.route('/api/staff/<id>', methods=['GET'])
@@ -121,10 +122,10 @@ def staff(id):
 def daily_form(day):
     try:
         day_form = DailyForm.query.join(Staff, DailyForm.name==Staff.id)\
-            .add_columns(Staff.name, Staff.department).filter_by(day=day).all()
-            #.join(Staff)\
-            #.filter_by(day=day).all()
-        return jsonify(day_form)
+            .add_columns(Staff.name, Staff.department).filter(day==DailyForm.day).all()
+        form_tup = [tuple(row) for row in day_form]
+        print(day, file=sys.stderr)
+        return jsonify(form_tup)
     except:
         return "Resource not found"
     
@@ -133,8 +134,7 @@ def all_days():
     day_form = DailyForm.query.join(Staff, DailyForm.name==Staff.id)\
     .add_columns(Staff.name, Staff.department).all()
     form_tup = [tuple(row) for row in day_form]
-    form_tup_b = [item[1::] for item in form_tup]
-    
+        
     return jsonify(form_tup)
         
         
