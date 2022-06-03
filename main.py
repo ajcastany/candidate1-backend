@@ -3,6 +3,7 @@ import configparser
 from dataclasses import dataclass
 from doctest import FAIL_FAST
 import json
+from operator import itemgetter
 import psycopg2
 from typing import Dict, List
 from flask import Flask, jsonify
@@ -117,17 +118,27 @@ class StaffSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Staff
 class AllDaysSchema(ma.Schema):
-    id = ma.fields.int()
-    day = ma.fields.Date()
-    name = ma.fields.Str()
-    department = ma.fields.Str()
-    room = ma.fields.Str()
-    time_in = ma.fields.Time()
-    time_out = ma.fields.Time()
-    tag = ma.fields.Str()
-    tag_ret = ma.fields.Bool
+    pass
     
-    
+from sqlalchemy.ext.declarative import DeclarativeMeta
+
+class AlchemyEncoder(json.JSONEncoder):
+
+    def default(self, obj):
+        if isinstance(obj.__class__, DeclarativeMeta):
+            # an SQLAlchemy class
+            fields = {}
+            for field in [x for x in dir(obj) if not x.startswith('_') and x != 'metadata']:
+                data = obj.__getattribute__(field)
+                try:
+                    json.dumps(data) # this will fail on non-encodable values, like other classes
+                    fields[field] = data
+                except TypeError:
+                    fields[field] = None
+            # a json-encodable dict
+            return fields
+
+        return json.JSONEncoder.default(self, obj)
 
 """
 Initialize Marshmallow Schemas
@@ -159,7 +170,7 @@ def staff(id):
 def daily_form(day):
     try:
         daily_form_schema = DailyFormSchema()
-        day_form = DailyForm.query.join(Staff, name=Staff.id)\
+        day_form = DailyForm.query.join(Staff, DailyForm.name==Staff.id)\
             .add_columns(Staff.name, Staff.department).filter_by(day=day).all()
             #.join(Staff)\
             #.filter_by(day=day).all()
@@ -169,11 +180,15 @@ def daily_form(day):
     
 @app.route('/api/all_days')
 def all_days():
-    day_form = DailyForm.query.join(Staff)\
-        .add_columns(DailyForm.id, DailyForm.day, Staff.name, Staff.department, 
+    day_form = DailyForm.query.join(Staff, DailyForm.name==Staff.id)\
+    .add_columns(DailyForm.id, DailyForm.day, Staff.name, Staff.department, 
                      DailyForm.room, DailyForm.time_in, DailyForm.time_out, 
                      DailyForm.tag, DailyForm.tag).all()
-    return daily_form_schema.dump(day_form)
+    form_tup = [tuple(row) for row in day_form]
+    form_tup_b = [item[1::] for item in form_tup]
+    
+    return jsonify(form_tup_b)
+        
         
 
 if __name__ == '__main__':
