@@ -129,15 +129,29 @@ def daily_form(day):
     except:
         return "Resource not found"
     
-@app.route('/api/all_days')
+@app.route('/api/daily_form/all_days', methods=['GET'])
 def all_days():
     day_form = DailyForm.query.join(Staff, DailyForm.name==Staff.id)\
     .add_columns(Staff.name, Staff.department).all()
     form_tup = [tuple(row) for row in day_form]
         
     return jsonify(form_tup)
+
+@app.route('/api/daily_form/room', methods=['POST'])
+def add_room():
+    pass
         
-        
+@app.route('/api/daily_form/time', methods=['POST'])
+def time_in_out():
+    pass
+
+@app.route('/api/daily_form/tag', methods=['POST'])
+def add_tag():
+    pass
+
+@app.route('/api/daily_form/tag_ret', methods=['POST'])
+def tag_ret():
+    pass
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
