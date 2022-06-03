@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from operator import itemgetter
 import psycopg2
 from typing import Dict, List
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import false
 
@@ -124,7 +124,6 @@ def daily_form(day):
         day_form = DailyForm.query.join(Staff, DailyForm.name==Staff.id)\
             .add_columns(Staff.name, Staff.department).filter(day==DailyForm.day).all()
         form_tup = [tuple(row) for row in day_form]
-        print(day, file=sys.stderr)
         return jsonify(form_tup)
     except:
         return "Resource not found"
@@ -139,19 +138,55 @@ def all_days():
 
 @app.route('/api/daily_form/room', methods=['POST'])
 def add_room():
-    pass
+    if not request.is_json:
+        return "bad request"
+    request_json = request.get_json()
+    row_id = request_json["id"]
+    try:
+        daily_form = DailyForm(id=row_id, room=request_json['room'])
+        db.session.add(daily_form)
+        db.session.commit()
+    except:
+        return "Bad request"
         
 @app.route('/api/daily_form/time', methods=['POST'])
 def time_in_out():
-    pass
+    if not request.is_json:
+        return "bad request"
+    request_json = request.get_json()
+    row_id = request_json['id']
+    try:
+        daily_form = DailyForm(id=row_id, time_in=request_json['time_in'], time_out=request_json['time_out'])
+        db.session.add(daily_form)
+        db.session.commit()
+    except:
+        return "bad request"
 
 @app.route('/api/daily_form/tag', methods=['POST'])
 def add_tag():
-    pass
+     if not request.is_json:
+        return "bad request"
+     request_json = request.get_json()
+     row_id = request_json['id']
+     try:
+        daily_form = DailyForm(id=row_id, tag=request_json['tag'])
+        db.session.add(daily_form)
+        db.session.commit()
+     except:
+        return "bad request"
 
 @app.route('/api/daily_form/tag_ret', methods=['POST'])
 def tag_ret():
-    pass
+     if not request.is_json:
+        return "bad request"
+     request_json = request.get_json()
+     row_id = request_json['id']
+     try:
+        daily_form = DailyForm(id=row_id, tag_ret=request_json['tag_ret'])
+        db.session.add(daily_form)
+        db.session.commit()
+     except:
+        return "bad request"
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', debug=True)
