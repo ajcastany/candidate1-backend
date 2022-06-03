@@ -116,13 +116,26 @@ class DailyFormSchema(ma.SQLAlchemySchema):
 class StaffSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Staff
+class AllDaysSchema(ma.Schema):
+    id = ma.fields.int()
+    day = ma.fields.Date()
+    name = ma.fields.Str()
+    department = ma.fields.Str()
+    room = ma.fields.Str()
+    time_in = ma.fields.Time()
+    time_out = ma.fields.Time()
+    tag = ma.fields.Str()
+    tag_ret = ma.fields.Bool
+    
+    
 
 """
 Initialize Marshmallow Schemas
 """
 
 daily_form_schema = DailyFormSchema()     
-staff_schema = StaffSchema()  
+staff_schema = StaffSchema()
+all_days_schema = AllDaysSchema()
 
 
 """
@@ -157,10 +170,9 @@ def daily_form(day):
 @app.route('/api/all_days')
 def all_days():
     day_form = DailyForm.query.join(Staff)\
-        .add_columns(DailyForm.id, Staff.name, Staff.department, 
+        .add_columns(DailyForm.id, DailyForm.day, Staff.name, Staff.department, 
                      DailyForm.room, DailyForm.time_in, DailyForm.time_out, 
                      DailyForm.tag, DailyForm.tag).all()
-    print(day_form)
     return daily_form_schema.dump(day_form)
         
 

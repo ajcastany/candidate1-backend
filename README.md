@@ -8,7 +8,7 @@
 
 #### POST
 
-`/api/dailyform/add_entry{entry}` 
+`/api/dailyform/add_entry{entry}` creates new entry on dailyform
 
 #### UPDATE
 
