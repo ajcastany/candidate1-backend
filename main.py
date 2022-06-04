@@ -33,9 +33,9 @@ conf_dict = read_config("db_conn.config")
 app.config.update(
     ENV='development',
     SQLALCHEMY_DATABASE_URI=conf_dict['server_uri'],
-    SQLALCHEMY_TRACK_MODIFICATIONS= False,
-    JSON_SORT_KEYS = False
-    )
+    SQLALCHEMY_TRACK_MODIFICATIONS=False,
+    JSON_SORT_KEYS=False
+)
 
 
 db = SQLAlchemy(app)
@@ -43,25 +43,27 @@ db = SQLAlchemy(app)
 """
 Models:
 """
+
+
 @dataclass
 class Staff(db.Model):
     """From an answer on SO: https://stackoverflow.com/questions/5022066/how-to-serialize-sqlalchemy-result-to-json"""
-    __tablename__  = "staff"
-    
+    __tablename__ = "staff"
+
     id: int
     name: str
     department: str
-    
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
     department = db.Column(db.String(50), nullable=False)
     fk = db.relationship('DailyForm', lazy='dynamic')
-            
-    
+
+
 @dataclass
 class DailyForm(db.Model):
     __tablename__ = "daily_form"
-    
+
     id: int
     day: db.DATE
     name: int
@@ -70,25 +72,32 @@ class DailyForm(db.Model):
     time_out: db.TIME
     tag: str
     tag_ret: bool
-    
+
     id = db.Column(db.Integer, primary_key=True)
     day = db.Column(db.DATE, nullable=False)
-    name = db.Column(db.Integer, db.ForeignKey('staff.id' ), nullable=False)
+    name = db.Column(db.Integer, db.ForeignKey('staff.id'), nullable=False)
     room = db.Column(db.String, nullable=True)
     time_in = db.Column(db.TIME, nullable=True)
     time_out = db.Column(db.TIME, nullable=True)
     tag = db.Column(db.String, nullable=True)
     tag_ret = db.Column(db.Boolean, nullable=True)
-    
+
 
 """
 Routes:
 """
-    
+
+
+@app.route('/')
+def home():
+    return 'Welcome to the API'
+
+
 @app.route('/api/staff/all', methods=['GET'])
 def all_staff():
     test = Staff.query.all()
     return jsonify(test)
+
 
 @app.route('/api/staff/<id>', methods=['GET'])
 def staff(id):
@@ -98,23 +107,26 @@ def staff(id):
     except:
         return ("resource not found")
 
+
 @app.route('/api/daily_form/<day>', methods=['GET'])
 def daily_form(day):
     try:
-        day_form = DailyForm.query.join(Staff, DailyForm.name==Staff.id)\
-            .add_columns(Staff.name, Staff.department).filter(day==DailyForm.day).all()
+        day_form = DailyForm.query.join(Staff, DailyForm.name == Staff.id)\
+            .add_columns(Staff.name, Staff.department).filter(day == DailyForm.day).all()
         form_tup = [tuple(row) for row in day_form]
         return jsonify(form_tup)
     except:
         return "Resource not found"
-    
+
+
 @app.route('/api/daily_form/all_days', methods=['GET'])
 def all_days():
-    day_form = DailyForm.query.join(Staff, DailyForm.name==Staff.id)\
-    .add_columns(Staff.name, Staff.department).all()
+    day_form = DailyForm.query.join(Staff, DailyForm.name == Staff.id)\
+        .add_columns(Staff.name, Staff.department).all()
     form_tup = [tuple(row) for row in day_form]
-        
+
     return jsonify(form_tup)
+
 
 @app.route('/api/daily_form/room', methods=['POST'])
 def add_room():
@@ -128,7 +140,8 @@ def add_room():
         db.session.commit()
     except:
         return "Bad request"
-        
+
+
 @app.route('/api/daily_form/time', methods=['POST'])
 def time_in_out():
     if not request.is_json:
@@ -136,37 +149,41 @@ def time_in_out():
     request_json = request.get_json()
     row_id = request_json['id']
     try:
-        daily_form = DailyForm(id=row_id, time_in=request_json['time_in'], time_out=request_json['time_out'])
+        daily_form = DailyForm(
+            id=row_id, time_in=request_json['time_in'], time_out=request_json['time_out'])
         db.session.add(daily_form)
         db.session.commit()
     except:
         return "bad request"
 
+
 @app.route('/api/daily_form/tag', methods=['POST'])
 def add_tag():
-     if not request.is_json:
+    if not request.is_json:
         return "bad request"
-     request_json = request.get_json()
-     row_id = request_json['id']
-     try:
+    request_json = request.get_json()
+    row_id = request_json['id']
+    try:
         daily_form = DailyForm(id=row_id, tag=request_json['tag'])
         db.session.add(daily_form)
         db.session.commit()
-     except:
+    except:
         return "bad request"
+
 
 @app.route('/api/daily_form/tag_ret', methods=['POST'])
 def tag_ret():
-     if not request.is_json:
+    if not request.is_json:
         return "bad request"
-     request_json = request.get_json()
-     row_id = request_json['id']
-     try:
+    request_json = request.get_json()
+    row_id = request_json['id']
+    try:
         daily_form = DailyForm(id=row_id, tag_ret=request_json['tag_ret'])
         db.session.add(daily_form)
         db.session.commit()
-     except:
+    except:
         return "bad request"
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
