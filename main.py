@@ -120,6 +120,16 @@ def daily_form(day):
         return "Resource not found"
 
 
+@app.route('/api/daily_form/<staff_id>', methods=['get'])
+def daily_form_by_id(staff_id):
+    try:
+        day_form = DailyForm.query.join()(Staff, DailyForm.name == Staff.id)\
+            .add_columns(Staff.name, Staff.department).filter_by(staff_id == DailyForm.id).first()
+        return jsonify(day_form)
+    except Exception as e:
+        print("Error: " + str(e), flush=True)
+
+
 @app.route('/api/daily_form/all_days', methods=['GET'])
 def all_days():
     day_form = DailyForm.query.join(Staff, DailyForm.name == Staff.id)\
