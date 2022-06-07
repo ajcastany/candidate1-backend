@@ -160,29 +160,40 @@ def time_in_out():
 
 @app.route('/api/daily_form/tag', methods=['POST'])
 def add_tag():
+    print("hello", flush=True)
     if not request.is_json:
+        print("bad", flush=True)
         return "bad request"
     request_json = request.get_json()
     row_id = request_json['id']
+    print("request", request_json)
     try:
-        daily_form = DailyForm(id=row_id, tag=request_json['tag'])
+        daily_form = DailyForm.query.filter_by(id=row_id).first()
+        daily_form.tag = request_json['tag']
         db.session.add(daily_form)
+        # db.session.merge(daily_form)
         db.session.commit()
-    except:
+        return "ok"
+    except Exception as e:
+        print("bad request: " + str(e), flush=True)
         return "bad request"
 
 
 @app.route('/api/daily_form/tag_ret', methods=['POST'])
 def tag_ret():
+    print("tag ret", flush=True)
     if not request.is_json:
+        print("bad", flush=True)
         return "bad request"
     request_json = request.get_json()
     row_id = request_json['id']
+    print(request_json, flush=True)
     try:
         daily_form = DailyForm(id=row_id, tag_ret=request_json['tag_ret'])
         db.session.add(daily_form)
         db.session.commit()
     except:
+        print("bad request", flus=True)
         return "bad request"
 
 
