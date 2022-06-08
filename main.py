@@ -6,7 +6,7 @@ from typing import Dict, List
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import false
+from sqlalchemy import JSON, false
 
 """
 FUNCTIONS
@@ -109,7 +109,7 @@ def staff(id):
         return ("resource not found")
 
 
-@app.route('/api/daily_form/<day>', methods=['GET'])
+@app.route('/api/daily_form/day/<day>', methods=['GET'])
 def daily_form(day):
     try:
         day_form = DailyForm.query.join(Staff, DailyForm.name == Staff.id)\
@@ -120,12 +120,17 @@ def daily_form(day):
         return "Resource not found"
 
 
-@app.route('/api/daily_form/<staff_id>', methods=['get'])
-def daily_form_by_id(staff_id):
+@app.route('/api/daily_form/row/<row_id>', methods=['get'])
+def daily_form_by_id(row_id):
+    print("here", flush=True)
     try:
-        day_form = DailyForm.query.join()(Staff, DailyForm.name == Staff.id)\
-            .add_columns(Staff.name, Staff.department).filter_by(staff_id == DailyForm.id).first()
-        return jsonify(day_form)
+        day_form = DailyForm.query.join(Staff, DailyForm.name == Staff.id)\
+            .add_columns(Staff.name, Staff.department).filter(row_id == DailyForm.id).first()
+        #print(day_form, flush=True)
+        #form_tup = [tuple(row) for row in day_form]
+        print("this one:" + str(day_form), flush=True)
+        tup_form = list(day_form)
+        return jsonify(tup_form)
     except Exception as e:
         print("Error: " + str(e), flush=True)
 
@@ -134,8 +139,9 @@ def daily_form_by_id(staff_id):
 def all_days():
     day_form = DailyForm.query.join(Staff, DailyForm.name == Staff.id)\
         .add_columns(Staff.name, Staff.department).all()
+    #print("print" + str(day_form), flush=True)
     form_tup = [tuple(row) for row in day_form]
-
+    print(form_tup, flush=True)
     return jsonify(form_tup)
 
 
@@ -176,7 +182,7 @@ def add_tag():
         return "bad request"
     request_json = request.get_json()
     row_id = request_json['id']
-    print("request", request_json)
+    #print("request", request_json)
     try:
         daily_form = DailyForm.query.filter_by(id=row_id).first()
         daily_form.tag = request_json['tag']
