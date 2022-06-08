@@ -118,7 +118,7 @@ def staff(id):
 def daily_form(day):
     try:
         day_form = DailyForm.query.join(Staff, DailyForm.name == Staff.id)\
-            .add_columns(Staff.name, Staff.department).filter(day == DailyForm.day).all()
+            .add_columns(Staff.name, Staff.department).filter_by(day = DailyForm.day).all()
         form_tup = [tuple(row) for row in day_form]
         return jsonify(form_tup)
     except:
@@ -130,7 +130,7 @@ def daily_form_by_id(row_id):
     print("here", flush=True)
     try:
         day_form = DailyForm.query.join(Staff, DailyForm.name == Staff.id)\
-            .add_columns(Staff.name, Staff.department).filter(row_id == DailyForm.id).all()
+            .add_columns(Staff.name, Staff.department).filter_by(row_id = DailyForm.id).all()
         #print(day_form, flush=True)
         #form_tup = [tuple(row) for row in day_form]
         print("this one:" + str(day_form), flush=True)
@@ -140,11 +140,11 @@ def daily_form_by_id(row_id):
     except Exception as e:
         print("Error: " + str(e), flush=True)
         
-@app.route('/api/daily_form/day_id/<day_id>', methods=['get'])
-def get_day_by_id(day_id):
+@app.route('/api/daily_form/row_id/<row_id>', methods=['get'])
+def get_day_by_id(row_id):
     try:
         day_form = DailyForm.query.join(Staff, DailyForm.name == Staff.id)\
-            .filter(day_id == DailyForm.id).all()
+            .filter(row_id == DailyForm.id).all()
         
         res = dict()
             
