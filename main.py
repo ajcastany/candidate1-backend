@@ -63,32 +63,6 @@ class Staff(db.Model):
     def __repr__(self):
         return f"<Staff {staff.id}>"
 
-
-""" @dataclass
-class DailyForm(db.Model):
-    __tablename__ = "daily_form"
-
-    id: int
-    day: db.DATE
-    name: int
-    room: str
-    time_in: db.TIME
-    time_out: db.TIME
-    tag: str
-    tag_ret: bool
-
-    id = db.Column(db.Integer, primary_key=True, autoincrement="auto")
-    day = db.Column(db.DATE, nullable=False)
-    name = db.Column(db.Integer, db.ForeignKey('staff.id'), nullable=False)
-    room = db.Column(db.String, nullable=True)
-    time_in = db.Column(db.TIME, nullable=True)
-    time_out = db.Column(db.TIME, nullable=True)
-    tag = db.Column(db.String, nullable=True)
-    tag_ret = db.Column(db.Boolean, nullable=True)
-    
-    def __repr__(self):
-        return f"<DailyForm {self.id}>" """
-
 @dataclass
 class DailyForm(db.Model):
     __tablename__ = "daily_form"
