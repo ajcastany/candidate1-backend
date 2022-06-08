@@ -55,11 +55,39 @@ class Staff(db.Model):
     name: str
     department: str
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement="auto")
     name = db.Column(db.String(50), nullable=False)
     department = db.Column(db.String(50), nullable=False)
-    fk = db.relationship('DailyForm', lazy='dynamic')
+    #fk = db.relationship('DailyForm', lazy='dynamic')
+    
+    def __repr__(self):
+        return f"<Staff {staff.id}>"
 
+
+""" @dataclass
+class DailyForm(db.Model):
+    __tablename__ = "daily_form"
+
+    id: int
+    day: db.DATE
+    name: int
+    room: str
+    time_in: db.TIME
+    time_out: db.TIME
+    tag: str
+    tag_ret: bool
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement="auto")
+    day = db.Column(db.DATE, nullable=False)
+    name = db.Column(db.Integer, db.ForeignKey('staff.id'), nullable=False)
+    room = db.Column(db.String, nullable=True)
+    time_in = db.Column(db.TIME, nullable=True)
+    time_out = db.Column(db.TIME, nullable=True)
+    tag = db.Column(db.String, nullable=True)
+    tag_ret = db.Column(db.Boolean, nullable=True)
+    
+    def __repr__(self):
+        return f"<DailyForm {self.id}>" """
 
 @dataclass
 class DailyForm(db.Model):
@@ -73,7 +101,7 @@ class DailyForm(db.Model):
     time_out: db.TIME
     tag: str
     tag_ret: bool
-
+    
     id = db.Column(db.Integer, primary_key=True)
     day = db.Column(db.DATE, nullable=False)
     name = db.Column(db.Integer, db.ForeignKey('staff.id'), nullable=False)
@@ -82,8 +110,11 @@ class DailyForm(db.Model):
     time_out = db.Column(db.TIME, nullable=True)
     tag = db.Column(db.String, nullable=True)
     tag_ret = db.Column(db.Boolean, nullable=True)
-
-
+    staff = db.relationship("Staff")
+    
+    def __repr__(self):
+        return f"<DailyForm {daily_form.id}>"
+    
 """
 Routes:
 """
@@ -125,12 +156,38 @@ def daily_form_by_id(row_id):
     print("here", flush=True)
     try:
         day_form = DailyForm.query.join(Staff, DailyForm.name == Staff.id)\
-            .add_columns(Staff.name, Staff.department).filter(row_id == DailyForm.id).first()
+            .add_columns(Staff.name, Staff.department).filter(row_id == DailyForm.id).all()
         #print(day_form, flush=True)
         #form_tup = [tuple(row) for row in day_form]
         print("this one:" + str(day_form), flush=True)
-        tup_form = list(day_form)
-        return jsonify(tup_form)
+        print(day_form.__dict__, flush=True)
+        #day_list = tuple(day_form)
+        return day_form
+    except Exception as e:
+        print("Error: " + str(e), flush=True)
+        
+@app.route('/api/daily_form/day_id/<day_id>', methods=['get'])
+def get_day_by_id(day_id):
+    try:
+        day_form = DailyForm.query.join(Staff, DailyForm.name == Staff.id)\
+            .filter(day_id == DailyForm.id).all()
+        
+        res = dict()
+            
+        for day in day_form:
+            res = {
+                "id": day.id,
+                "day": day.day,
+                "name": day.name,
+                "room": day.room,
+                "time_in":day.time_in,
+                "time_out": day.time_out,
+                "tag": day.tag,
+                "tag_ret": day.tag_ret,
+                "name_dep": {"staff_name:": day.staff.name, "staff_dept": day.staff.department}
+            }
+        print("new dict: " + str(res), flush=True)
+        return jsonify(res)
     except Exception as e:
         print("Error: " + str(e), flush=True)
 
@@ -141,7 +198,7 @@ def all_days():
         .add_columns(Staff.name, Staff.department).all()
     #print("print" + str(day_form), flush=True)
     form_tup = [tuple(row) for row in day_form]
-    print(form_tup, flush=True)
+    #print(form_tup, flush=True)
     return jsonify(form_tup)
 
 
