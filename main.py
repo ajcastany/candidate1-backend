@@ -147,6 +147,7 @@ def get_day_by_id(row_id):
             .filter(row_id == DailyForm.id).all()
         
         res = dict()
+
             
         for day in day_form:
             res = {
@@ -160,6 +161,7 @@ def get_day_by_id(row_id):
                 "tag_ret": day.tag_ret,
                 "name_dep": {"staff_name:": day.staff.name, "staff_dept": day.staff.department}
             }
+
         print("new dict: " + str(res), flush=True)
         return jsonify(res)
     except Exception as e:
@@ -168,13 +170,29 @@ def get_day_by_id(row_id):
 
 @app.route('/api/daily_form/all_days', methods=['GET'])
 def all_days():
-    day_form = DailyForm.query.join(Staff, DailyForm.name == Staff.id)\
-        .add_columns(Staff.name, Staff.department).all()
+    try:
+        day_form = DailyForm.query.join(Staff, DailyForm.name == Staff.id).all()
     #print("print" + str(day_form), flush=True)
-    form_tup = [tuple(row) for row in day_form]
-    #print(form_tup, flush=True)
-    return jsonify(form_tup)
-
+        res = dict()
+        response_list = list()            
+        for day in day_form:
+            res = {
+                "id": day.id,
+                "day": day.day,
+                "name": day.name,
+                "room": day.room,
+                "time_in":day.time_in,
+                "time_out": day.time_out,
+                "tag": day.tag,
+                "tag_ret": day.tag_ret,
+                "name_dep": {"staff_name:": day.staff.name, "staff_dept": day.staff.department}
+            }
+            response_list.append(res)
+        print("new dict: " + str(response_list), flush=True)
+        return jsonify(response_list)
+    except Exception as e:
+        print("Error: " + str(e), flush=True)
+    
 
 @app.route('/api/daily_form/room', methods=['POST'])
 def add_room():
