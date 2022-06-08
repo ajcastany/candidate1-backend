@@ -169,7 +169,7 @@ def all_days():
                 "time_out": day.time_out,
                 "tag": day.tag,
                 "tag_ret": day.tag_ret,
-                "name_dep": {"staff_name:": day.staff.name, "staff_dept": day.staff.department}
+                "name_dep": {"staff_name": day.staff.name, "staff_dept": day.staff.department}
             }
             response_list.append(res)
         print("new dict: " + str(response_list), flush=True)
