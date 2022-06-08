@@ -124,22 +124,6 @@ def daily_form(day):
     except:
         return "Resource not found"
 
-
-@app.route('/api/daily_form/row/<row_id>', methods=['get'])
-def daily_form_by_id(row_id):
-    print("here", flush=True)
-    try:
-        day_form = DailyForm.query.join(Staff, DailyForm.name == Staff.id)\
-            .add_columns(Staff.name, Staff.department).filter_by(row_id = DailyForm.id).all()
-        #print(day_form, flush=True)
-        #form_tup = [tuple(row) for row in day_form]
-        print("this one:" + str(day_form), flush=True)
-        print(day_form.__dict__, flush=True)
-        #day_list = tuple(day_form)
-        return day_form
-    except Exception as e:
-        print("Error: " + str(e), flush=True)
-        
 @app.route('/api/daily_form/row_id/<row_id>', methods=['get'])
 def get_day_by_id(row_id):
     try:
@@ -159,7 +143,7 @@ def get_day_by_id(row_id):
                 "time_out": day.time_out,
                 "tag": day.tag,
                 "tag_ret": day.tag_ret,
-                "name_dep": {"staff_name:": day.staff.name, "staff_dept": day.staff.department}
+                "name_dep": {"staff_name": day.staff.name, "staff_dept": day.staff.department}
             }
 
         print("new dict: " + str(res), flush=True)
