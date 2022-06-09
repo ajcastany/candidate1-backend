@@ -202,13 +202,22 @@ def time_in_out():
         return "bad request"
     request_json = request.get_json()
     row_id = request_json['id']
+    ti_time = str()
+    to_time = str()
     try:
-        time_in = datetime.strptime(
-            request_json['time_in'], ('%Y-%m-%dT%H:%M:%S.%f%z'))
-        time_out = datetime.strptime(
-            request_json['time_out'], ('%Y-%m-%dT%H:%M:%S.%f%z'))
-        ti_time = time_in.time()
-        to_time = time_out.time()
+        if request_json['time_in'] == 'None':
+            ti_time == 'None'
+        else:
+            time_in = datetime.strptime(
+                request_json['time_in'], ('%Y-%m-%dT%H:%M:%S.%f%z'))
+            ti_time = time_in.time()
+        if request_json['time_out'] == 'None':
+            to_time == 'None'
+        else:
+            time_out = datetime.strptime(
+                request_json['time_out'], ('%Y-%m-%dT%H:%M:%S.%f%z'))
+            to_time = time_out.time()
+
         """ daily_form = DailyForm(
             id=row_id, time_in=ti_time, time_out=to_time) """
         daily_form = DailyForm.query.filter_by(id=row_id).first()
