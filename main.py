@@ -149,7 +149,7 @@ def get_day_by_id(row_id):
                 "name_dep": {"staff_name": day.staff.name, "staff_dept": day.staff.department}
             }
 
-        print("new dict: " + str(res), flush=True)
+        #print("new dict: " + str(res), flush=True)
         return jsonify(res)
     except Exception as e:
         print("Error: " + str(e), flush=True)
@@ -176,7 +176,7 @@ def all_days():
                 "name_dep": {"staff_name": day.staff.name, "staff_dept": day.staff.department}
             }
             response_list.append(res)
-        print("new dict: " + str(response_list), flush=True)
+        #print("new dict: " + str(response_list), flush=True)
         return jsonify(response_list)
     except Exception as e:
         print("Error: " + str(e), flush=True)
@@ -204,22 +204,25 @@ def time_in_out():
     row_id = request_json['id']
     ti_time = str()
     to_time = str()
+    print("request_json: " + request_json['time_out'], flush=True)
     try:
         if request_json['time_in'] == '' or request_json['time_in'] == 'None':
             ti_time = None
-        else:
+        elif request_json['time_in'] != '' and request_json['time_in'] != 'None':
             time_in = datetime.strptime(
-                request_json['time_in'], ('%H:%M'))
+                request_json['time_in'], ('%H:%M:%S'))
             ti_time = time_in.time()
-        if request_json['time_out'] == '' or request_json['time_out'] == 'None':
+            
+        if request_json['time_out'] == '' or request_json['time_out'] == 'None':  
             to_time = None
-        else:
+        elif request_json['time_out'] != '' and request_json['time_out'] != 'None':  
+            print("reques: " + request_json['time_out'], flush=True)
             time_out = datetime.strptime(
-                request_json['time_out'], ('%H:%M'))
+                request_json['time_out'], ('%H:%M:%S'))
+            print("time_out" + str(time_out), flush=True)
             to_time = time_out.time()
+            print("to_time" + str(to_time), flush=True)
 
-        """ daily_form = DailyForm(
-            id=row_id, time_in=ti_time, time_out=to_time) """
         daily_form = DailyForm.query.filter_by(id=row_id).first()
         daily_form.time_in = ti_time
         daily_form.time_out = to_time
