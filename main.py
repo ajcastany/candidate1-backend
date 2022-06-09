@@ -205,17 +205,17 @@ def time_in_out():
     ti_time = str()
     to_time = str()
     try:
-        if request_json['time_in'] == 'None':
-            ti_time == 'None'
+        if request_json['time_in'] == '' or request_json['time_in'] == 'None':
+            ti_time = None
         else:
             time_in = datetime.strptime(
-                request_json['time_in'], ('%Y-%m-%dT%H:%M:%S.%f%z'))
+                request_json['time_in'], ('%H:%M'))
             ti_time = time_in.time()
-        if request_json['time_out'] == 'None':
-            to_time == 'None'
+        if request_json['time_out'] == '' or request_json['time_out'] == 'None':
+            to_time = None
         else:
             time_out = datetime.strptime(
-                request_json['time_out'], ('%Y-%m-%dT%H:%M:%S.%f%z'))
+                request_json['time_out'], ('%H:%M'))
             to_time = time_out.time()
 
         """ daily_form = DailyForm(
