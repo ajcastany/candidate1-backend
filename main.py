@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import configparser
 from dataclasses import dataclass
+from datetime import datetime
 from operator import itemgetter
 from typing import Dict, List
 from flask import Flask, jsonify, request
@@ -59,9 +60,10 @@ class Staff(db.Model):
     name = db.Column(db.String(50), nullable=False)
     department = db.Column(db.String(50), nullable=False)
     #fk = db.relationship('DailyForm', lazy='dynamic')
-    
+
     def __repr__(self):
         return f"<Staff {staff.id}>"
+
 
 @dataclass
 class DailyForm(db.Model):
@@ -75,7 +77,7 @@ class DailyForm(db.Model):
     time_out: db.TIME
     tag: str
     tag_ret: bool
-    
+
     id = db.Column(db.Integer, primary_key=True)
     day = db.Column(db.DATE, nullable=False)
     name = db.Column(db.Integer, db.ForeignKey('staff.id'), nullable=False)
@@ -85,10 +87,11 @@ class DailyForm(db.Model):
     tag = db.Column(db.String, nullable=True)
     tag_ret = db.Column(db.Boolean, nullable=True)
     staff = db.relationship("Staff")
-    
+
     def __repr__(self):
         return f"<DailyForm {daily_form.id}>"
-    
+
+
 """
 Routes:
 """
@@ -118,28 +121,28 @@ def staff(id):
 def daily_form(day):
     try:
         day_form = DailyForm.query.join(Staff, DailyForm.name == Staff.id)\
-            .add_columns(Staff.name, Staff.department).filter_by(day = DailyForm.day).all()
+            .add_columns(Staff.name, Staff.department).filter_by(day=DailyForm.day).all()
         form_tup = [tuple(row) for row in day_form]
         return jsonify(form_tup)
     except:
         return "Resource not found"
+
 
 @app.route('/api/daily_form/row_id/<row_id>', methods=['get'])
 def get_day_by_id(row_id):
     try:
         day_form = DailyForm.query.join(Staff, DailyForm.name == Staff.id)\
             .filter(row_id == DailyForm.id).all()
-        
+
         res = dict()
 
-            
         for day in day_form:
             res = {
                 "id": day.id,
                 "day": day.day,
                 "name": day.name,
                 "room": day.room,
-                "time_in":day.time_in,
+                "time_in": day.time_in,
                 "time_out": day.time_out,
                 "tag": day.tag,
                 "tag_ret": day.tag_ret,
@@ -155,18 +158,19 @@ def get_day_by_id(row_id):
 @app.route('/api/daily_form/all_days', methods=['GET'])
 def all_days():
     try:
-        day_form = DailyForm.query.join(Staff, DailyForm.name == Staff.id).all()
+        day_form = DailyForm.query.join(
+            Staff, DailyForm.name == Staff.id).all()
     #print("print" + str(day_form), flush=True)
         res = dict()
-        response_list = list()            
+        response_list = list()
         for day in day_form:
             res = {
                 "id": day.id,
                 "day": day.day,
                 "name": day.name,
                 "room": day.room,
-                "time_in":day.time_in,
-                "time_out": day.time_out,
+                "time_in": str(day.time_in),
+                "time_out": str(day.time_out),
                 "tag": day.tag,
                 "tag_ret": day.tag_ret,
                 "name_dep": {"staff_name": day.staff.name, "staff_dept": day.staff.department}
@@ -176,7 +180,7 @@ def all_days():
         return jsonify(response_list)
     except Exception as e:
         print("Error: " + str(e), flush=True)
-    
+
 
 @app.route('/api/daily_form/room', methods=['POST'])
 def add_room():
@@ -199,12 +203,22 @@ def time_in_out():
     request_json = request.get_json()
     row_id = request_json['id']
     try:
-        daily_form = DailyForm(
-            id=row_id, time_in=request_json['time_in'], time_out=request_json['time_out'])
+        time_in = datetime.strptime(
+            request_json['time_in'], ('%Y-%m-%dT%H:%M:%S.%f%z'))
+        time_out = datetime.strptime(
+            request_json['time_out'], ('%Y-%m-%dT%H:%M:%S.%f%z'))
+        ti_time = time_in.time()
+        to_time = time_out.time()
+        """ daily_form = DailyForm(
+            id=row_id, time_in=ti_time, time_out=to_time) """
+        daily_form = DailyForm.query.filter_by(id=row_id).first()
+        daily_form.time_in = ti_time
+        daily_form.time_out = to_time
         db.session.add(daily_form)
         db.session.commit()
-    except:
-        return "bad request"
+    except Exception as e:
+        print("Error: " + str(e), flush=True)
+        return ("Error: " + str(e))
 
 
 @app.route('/api/daily_form/tag', methods=['POST'])
