@@ -142,8 +142,8 @@ def get_day_by_id(row_id):
                 "day": day.day,
                 "name": day.name,
                 "room": day.room,
-                "time_in": day.time_in,
-                "time_out": day.time_out,
+                "time_in": str(day.time_in),
+                "time_out": str(day.time_out),
                 "tag": day.tag,
                 "tag_ret": day.tag_ret,
                 "name_dep": {"staff_name": day.staff.name, "staff_dept": day.staff.department}
@@ -225,6 +225,7 @@ def time_in_out():
         daily_form.time_out = to_time
         db.session.add(daily_form)
         db.session.commit()
+        return "ok"
     except Exception as e:
         print("Error: " + str(e), flush=True)
         return ("Error: " + str(e))
