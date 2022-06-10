@@ -212,10 +212,10 @@ def time_in_out():
             time_in = datetime.strptime(
                 request_json['time_in'], ('%H:%M:%S'))
             ti_time = time_in.time()
-            
-        if request_json['time_out'] == '' or request_json['time_out'] == 'None':  
+
+        if request_json['time_out'] == '' or request_json['time_out'] == 'None':
             to_time = None
-        elif request_json['time_out'] != '' and request_json['time_out'] != 'None':  
+        elif request_json['time_out'] != '' and request_json['time_out'] != 'None':
             print("reques: " + request_json['time_out'], flush=True)
             time_out = datetime.strptime(
                 request_json['time_out'], ('%H:%M:%S'))
@@ -259,18 +259,22 @@ def add_tag():
 def tag_ret():
     print("tag ret", flush=True)
     if not request.is_json:
-        print("bad", flush=True)
+        print("Not JSON", flush=True)
         return "bad request"
     request_json = request.get_json()
     row_id = request_json['id']
     print(request_json, flush=True)
     try:
-        daily_form = DailyForm(id=row_id, tag_ret=request_json['tag_ret'])
+        #daily_form = DailyForm(id=row_id, tag_ret=request_json['tag_ret'])
+        daily_form = DailyForm.query.filter_by(id=row_id).first()
+        daily_form.tag_ret = request_json['tag_ret']
         db.session.add(daily_form)
         db.session.commit()
-    except:
-        print("bad request", flus=True)
-        return "bad request"
+        return "ok"
+
+    except Exception as e:
+        print("Error: " + str(e), flush=True)
+        return "Error: " + str(e)
 
 
 if __name__ == '__main__':
