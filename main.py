@@ -121,11 +121,26 @@ def staff(id):
 def daily_form(day):
     try:
         day_form = DailyForm.query.join(Staff, DailyForm.name == Staff.id)\
-            .add_columns(Staff.name, Staff.department).filter_by(day=DailyForm.day).all()
-        form_tup = [tuple(row) for row in day_form]
-        return jsonify(form_tup)
-    except:
-        return "Resource not found"
+            .filter_by(day == DailyForm.day)
+        res = dict()
+        for row in day_form:
+            res = {
+                "id": day.id,
+                "day": day.day,
+                "name": day.name,
+                "room": day.room,
+                "time_in": str(day.time_in),
+                "time_out": str(day.time_out),
+                "tag": day.tag,
+                "tag_ret": day.tag_ret,
+                "name_dep": {
+                    "staff_name": day.staff.name,
+                    "staff_dept": day.staff.department
+                }
+            }
+        return jsonify(res)
+    except Exception as e:
+        return "Exception: " + str(e)
 
 
 @app.route('/api/daily_form/row_id/<row_id>', methods=['get'])
