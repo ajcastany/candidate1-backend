@@ -121,7 +121,7 @@ def staff(id):
 def daily_form(day):
     try:
         day_form = DailyForm.query.join(Staff, DailyForm.name == Staff.id)\
-            .filter_by(day == DailyForm.day).all()
+            .filter(day == DailyForm.day).all()
         res = dict()
         response_list = list()
         for row in day_form:
