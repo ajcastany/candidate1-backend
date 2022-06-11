@@ -121,8 +121,9 @@ def staff(id):
 def daily_form(day):
     try:
         day_form = DailyForm.query.join(Staff, DailyForm.name == Staff.id)\
-            .filter_by(day == DailyForm.day)
+            .filter_by(day == DailyForm.day).all()
         res = dict()
+        response_list = list()
         for row in day_form:
             res = {
                 "id": day.id,
@@ -138,7 +139,8 @@ def daily_form(day):
                     "staff_dept": day.staff.department
                 }
             }
-        return jsonify(res)
+            response_list.append(res)
+        return jsonify(response_list)
     except Exception as e:
         return "Exception: " + str(e)
 
