@@ -118,7 +118,8 @@ def staff(id):
 
 
 @app.route('/api/daily_form/day/<day>', methods=['GET'])
-def daily_form(day):
+def get_day_by_day_str(day):
+
     try:
         day_form = DailyForm.query.join(Staff, DailyForm.name == Staff.id)\
             .filter(day == DailyForm.day).all()
@@ -126,22 +127,23 @@ def daily_form(day):
         response_list = list()
         for row in day_form:
             res = {
-                "id": day.id,
-                "day": day.day,
-                "name": day.name,
-                "room": day.room,
-                "time_in": str(day.time_in),
-                "time_out": str(day.time_out),
-                "tag": day.tag,
-                "tag_ret": day.tag_ret,
+                "id": row.id,
+                "day": row.day,
+                "name": row.name,
+                "room": row.room,
+                "time_in": str(row.time_in),
+                "time_out": str(row.time_out),
+                "tag": row.tag,
+                "tag_ret": row.tag_ret,
                 "name_dep": {
-                    "staff_name": day.staff.name,
-                    "staff_dept": day.staff.department
+                    "staff_name": row.staff.name,
+                    "staff_dept": row.staff.department
                 }
             }
             response_list.append(res)
         return jsonify(response_list)
     except Exception as e:
+        #print("Error: " + str(e))
         return "Exception: " + str(e)
 
 
@@ -153,17 +155,17 @@ def get_day_by_id(row_id):
 
         res = dict()
 
-        for day in day_form:
+        for row in day_form:
             res = {
-                "id": day.id,
-                "day": day.day,
-                "name": day.name,
-                "room": day.room,
-                "time_in": str(day.time_in),
-                "time_out": str(day.time_out),
-                "tag": day.tag,
-                "tag_ret": day.tag_ret,
-                "name_dep": {"staff_name": day.staff.name, "staff_dept": day.staff.department}
+                "id": row.id,
+                "day": row.day,
+                "name": row.name,
+                "room": row.room,
+                "time_in": str(row.time_in),
+                "time_out": str(row.time_out),
+                "tag": row.tag,
+                "tag_ret": row.tag_ret,
+                "name_dep": {"staff_name": row.staff.name, "staff_dept": row.staff.department}
             }
 
         #print("new dict: " + str(res), flush=True)
@@ -180,17 +182,17 @@ def all_days():
     #print("print" + str(day_form), flush=True)
         res = dict()
         response_list = list()
-        for day in day_form:
+        for row in day_form:
             res = {
-                "id": day.id,
-                "day": day.day,
-                "name": day.name,
-                "room": day.room,
-                "time_in": str(day.time_in),
-                "time_out": str(day.time_out),
-                "tag": day.tag,
-                "tag_ret": day.tag_ret,
-                "name_dep": {"staff_name": day.staff.name, "staff_dept": day.staff.department}
+                "id": row.id,
+                "day": row.day,
+                "name": row.name,
+                "room": row.room,
+                "time_in": str(row.time_in),
+                "time_out": str(row.time_out),
+                "tag": row.tag,
+                "tag_ret": row.tag_ret,
+                "name_dep": {"staff_name": row.staff.name, "staff_dept": row.staff.department}
             }
             response_list.append(res)
         #print("new dict: " + str(response_list), flush=True)
