@@ -104,7 +104,7 @@ def home():
 
 @app.route('/api/staff/all', methods=['GET'])
 def all_staff():
-    test = Staff.query.all()
+    test = Staff.query.order_by(Staff.name.desc()).all()
     return jsonify(test)
 
 
