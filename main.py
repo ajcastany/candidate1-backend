@@ -208,9 +208,12 @@ def add_room():
     request_json = request.get_json()
     row_id = request_json["id"]
     try:
-        daily_form = DailyForm(id=row_id, room=request_json['room'])
+        #daily_form = DailyForm(id=row_id, room=request_json['room'])
+        daily_form = DailyForm.query.filter_by(id=row_id).first()
+        daily_form.room = request_json['room']
         db.session.add(daily_form)
         db.session.commit()
+        return "ok"
     except:
         return "Bad request"
 
