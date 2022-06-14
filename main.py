@@ -89,7 +89,7 @@ class DailyForm(db.Model):
     staff = db.relationship("Staff")
 
     def __repr__(self):
-        return f"<DailyForm {daily_form.id}>"
+        return f"<DailyForm {id}>"
 
 
 """
