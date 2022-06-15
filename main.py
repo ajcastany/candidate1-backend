@@ -330,7 +330,7 @@ def tag_ret():
         return "Error: " + str(e)
 
 
-@app.route('api/daily_form/add_new_entry', methods=['PUT'])
+@app.route('/api/daily_form/add_new_entry', methods=['PUT'])
 def add_new_row_staff_id():
     try:
         if not request.is_json:
