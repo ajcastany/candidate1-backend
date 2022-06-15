@@ -78,7 +78,7 @@ class DailyForm(db.Model):
     tag: str
     tag_ret: bool
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement='auto')
     day = db.Column(db.DATE, nullable=False)
     name = db.Column(db.Integer, db.ForeignKey('staff.id'), nullable=False)
     room = db.Column(db.String, nullable=True)
@@ -102,6 +102,9 @@ def home():
     return 'Welcome to the API'
 
 
+"""GET all staff"""
+
+
 @app.route('/api/staff/all', methods=['GET'])
 def get_all_staff_list():
     try:
@@ -113,6 +116,9 @@ def get_all_staff_list():
         return str(e)
 
 
+"""Get Staff by Staf ID ===DEPR==="""
+
+
 @app.route('/api/staff/<id>', methods=['GET'])
 def staf_by_id(id):
     try:
@@ -120,6 +126,9 @@ def staf_by_id(id):
         return jsonify(staff)
     except:
         return ("resource not found")
+
+
+"""GET day by day string"""
 
 
 @app.route('/api/daily_form/day/<day>', methods=['GET'])
@@ -152,6 +161,9 @@ def get_day_by_day_str(day):
         return "Exception: " + str(e)
 
 
+"""GET row by row ID"""
+
+
 @app.route('/api/daily_form/row_id/<row_id>', methods=['get'])
 def get_day_by_id(row_id):
     try:
@@ -177,6 +189,9 @@ def get_day_by_id(row_id):
         return jsonify(res)
     except Exception as e:
         print("Error: " + str(e), flush=True)
+
+
+"""Get all days ==testing=="""
 
 
 @app.route('/api/daily_form/all_days', methods=['GET'])
@@ -206,6 +221,9 @@ def all_days():
         print("Error: " + str(e), flush=True)
 
 
+"""POST meeting room"""
+
+
 @app.route('/api/daily_form/room', methods=['POST'])
 def add_room():
     if not request.is_json:
@@ -221,6 +239,9 @@ def add_room():
         return "ok"
     except:
         return "Bad request"
+
+
+"""POST time in or out"""
 
 
 @app.route('/api/daily_form/time', methods=['POST'])
@@ -261,11 +282,13 @@ def time_in_out():
         return ("Error: " + str(e))
 
 
+"""POST Tag Issue"""
+
+
 @app.route('/api/daily_form/tag', methods=['POST'])
 def add_tag():
-    print("hello", flush=True)
+    #print("hello", flush=True)
     if not request.is_json:
-        print("bad", flush=True)
         return "bad request"
     request_json = request.get_json()
     row_id = request_json['id']
@@ -280,6 +303,9 @@ def add_tag():
     except Exception as e:
         print("bad request: " + str(e), flush=True)
         return "bad request"
+
+
+"""POST Tag returned"""
 
 
 @app.route('/api/daily_form/tag_ret', methods=['POST'])
@@ -302,6 +328,23 @@ def tag_ret():
     except Exception as e:
         print("Error: " + str(e), flush=True)
         return "Error: " + str(e)
+
+
+@app.route('api/daily_form/add_new_entry', methods=['PUT'])
+def add_new_row_staff_id():
+    try:
+        if not request.is_json:
+            return "bad request"
+        request_json = request.get_json()
+        add_new_entry = DailyForm(
+            day=request_json['day'], name=request_json['name_id'])
+        db.session.add(add_new_entry)
+        db.session.commit()
+        return "ok"
+        print()
+        return ""
+    except Exception as e:
+        return str(e)
 
 
 if __name__ == '__main__':
