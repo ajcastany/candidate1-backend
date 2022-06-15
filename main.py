@@ -62,7 +62,7 @@ class Staff(db.Model):
     #fk = db.relationship('DailyForm', lazy='dynamic')
 
     def __repr__(self):
-        return f"<Staff {staff.id}>"
+        return f"<Staff {id}>"
 
 
 @dataclass
