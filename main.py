@@ -103,13 +103,18 @@ def home():
 
 
 @app.route('/api/staff/all', methods=['GET'])
-def all_staff():
-    test = Staff.query.order_by(Staff.name.desc()).all()
-    return jsonify(test)
+def get_all_staff_list():
+    try:
+        all_staff_list = Staff.query.order_by(Staff.name.asc()).all()
+        #print("here" + str(all_staff_list), flush=True)
+        return jsonify(all_staff_list)
+    except Exception as e:
+        print("Error: " + str(e), flush=True)
+        return str(e)
 
 
 @app.route('/api/staff/<id>', methods=['GET'])
-def staff(id):
+def staf_by_id(id):
     try:
         staff = Staff.query.filter_by(id=id).first()
         return jsonify(staff)
