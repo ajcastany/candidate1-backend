@@ -8,6 +8,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import JSON, false
+from os import getenv
 
 """
 FUNCTIONS
@@ -31,10 +32,10 @@ MAIN
 """
 
 app = Flask(__name__)
-conf_dict = read_config("db_conn.config")
+#conf_dict = read_config("db_conn.config")
 app.config.update(
     ENV='development',
-    SQLALCHEMY_DATABASE_URI=conf_dict['server_uri'],
+    SQLALCHEMY_DATABASE_URI=getenv('SERVER_URI', None),
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
     JSON_SORT_KEYS=False
 )
@@ -346,19 +347,22 @@ def add_new_row_staff_id():
     except Exception as e:
         return str(e)
 
+
 @app.route('/api/daily_form/delete_entry/<entry_to_delete>', methods=['DELETE'])
 def delete_entry_by_id(entry_to_delete):
     try:
-        if entry_to_delete is "None":
+        if entry_to_delete == "None":
             return "bad request"
-        delete_row = DailyForm.query.filter(entry_to_delete == DailyForm.id).first()
+        delete_row = DailyForm.query.filter(
+            entry_to_delete == DailyForm.id).first()
         db.session.delete(delete_row)
         db.session.commit()
         return "ok"
-    
+
     except Exception as e:
         print(str(e), flush=True)
         return str(e)
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
