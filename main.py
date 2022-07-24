@@ -349,13 +349,13 @@ def add_new_row_staff_id():
 @app.route('/api/daily_form/delete_entry/<entry_to_delete>', methods=['DELETE'])
 def delete_entry_by_id(entry_to_delete):
     try:
-        if entry_to_delete is "None":
+        if entry_to_delete == "None":
             return "bad request"
         delete_row = DailyForm.query.filter(entry_to_delete == DailyForm.id).first()
         db.session.delete(delete_row)
         db.session.commit()
         return "ok"
-    
+
     except Exception as e:
         print(str(e), flush=True)
         return str(e)
