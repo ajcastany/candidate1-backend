@@ -3,6 +3,7 @@ import configparser
 from dataclasses import dataclass
 from datetime import datetime
 from operator import itemgetter
+from string import printable
 from typing import Dict, List
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -10,10 +11,11 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import JSON, false
 from os import getenv
 
+from sqlalchemy.orm import polymorphic_union
+
 """
 FUNCTIONS
 """
-
 
 def read_config(file_path):
     dictionary = dict()
@@ -100,14 +102,20 @@ Routes:
 
 @app.route('/')
 def home():
+    """Home of the website
+    returns "Welcome to the API"""
+
     return 'Welcome to the API'
 
-
-"""GET all staff"""
-
+"""============================================================
+                             GET Methods
+============================================================"""
 
 @app.route('/api/staff/all', methods=['GET'])
 def get_all_staff_list():
+    """Returns a json string of all the staff,
+    using the Staff class.
+    """
     try:
         all_staff_list = Staff.query.order_by(Staff.name.asc()).all()
         #print("here" + str(all_staff_list), flush=True)
@@ -116,12 +124,10 @@ def get_all_staff_list():
         print("Error: " + str(e), flush=True)
         return str(e)
 
-
-"""Get Staff by Staf ID ===DEPR==="""
-
-
 @app.route('/api/staff/<id>', methods=['GET'])
 def staf_by_id(id):
+    """Get Staff by Staf ID ===DEPRECATED===
+    This function is not in use by the frontend"""
     try:
         staff = Staff.query.filter_by(id=id).first()
         return jsonify(staff)
@@ -129,12 +135,11 @@ def staf_by_id(id):
         return ("resource not found")
 
 
-"""GET day by day string"""
-
-
 @app.route('/api/daily_form/day/<day>', methods=['GET'])
 def get_day_by_day_str(day):
-
+    """Returns a JSON string of DailyForm class of each entry for the parameter day.
+    Parameters:
+    day :string date to fetch from the database"""
     try:
         day_form = DailyForm.query.join(Staff, DailyForm.name == Staff.id)\
             .filter(day == DailyForm.day).all()
@@ -161,12 +166,13 @@ def get_day_by_day_str(day):
         #print("Error: " + str(e))
         return "Exception: " + str(e)
 
-
-"""GET row by row ID"""
-
-
 @app.route('/api/daily_form/row_id/<row_id>', methods=['get'])
 def get_day_by_id(row_id):
+    """TESTING ONLY
+    Returns json string of DailyForm class of row number
+    Parameters:
+    row_id: int row number"""
+
     try:
         day_form = DailyForm.query.join(Staff, DailyForm.name == Staff.id)\
             .filter(row_id == DailyForm.id).all()
@@ -192,11 +198,9 @@ def get_day_by_id(row_id):
         print("Error: " + str(e), flush=True)
 
 
-"""Get all days ==testing=="""
-
-
 @app.route('/api/daily_form/all_days', methods=['GET'])
 def all_days():
+    """TESTING ONLY  Returns all entries of the daily form database"""
     try:
         day_form = DailyForm.query.join(
             Staff, DailyForm.name == Staff.id).all()
@@ -221,12 +225,14 @@ def all_days():
     except Exception as e:
         print("Error: " + str(e), flush=True)
 
-
-"""POST meeting room"""
+"""===========================================================
+                             POST Methods
+============================================================"""
 
 
 @app.route('/api/daily_form/room', methods=['POST'])
 def add_room():
+    """Post meeting room on daily_form database"""
     if not request.is_json:
         return "bad request"
     request_json = request.get_json()
@@ -242,11 +248,9 @@ def add_room():
         return "Bad request"
 
 
-"""POST time in or out"""
-
-
 @app.route('/api/daily_form/time', methods=['POST'])
 def time_in_out():
+    """Posts time in or out on database row [time_in] or [time_out]"""
     if not request.is_json:
         return "bad request"
     request_json = request.get_json()
@@ -283,11 +287,9 @@ def time_in_out():
         return ("Error: " + str(e))
 
 
-"""POST Tag Issue"""
-
-
 @app.route('/api/daily_form/tag', methods=['POST'])
 def add_tag():
+    """Posts string tag number on database row [tag]"""
     #print("hello", flush=True)
     if not request.is_json:
         return "bad request"
@@ -306,11 +308,9 @@ def add_tag():
         return "bad request"
 
 
-"""POST Tag returned"""
-
-
 @app.route('/api/daily_form/tag_ret', methods=['POST'])
 def tag_ret():
+    """Posts bool on database row [tag_ret] if tag has been returned"""
     print("tag ret", flush=True)
     if not request.is_json:
         print("Not JSON", flush=True)
@@ -333,6 +333,7 @@ def tag_ret():
 
 @app.route('/api/daily_form/add_new_entry', methods=['PUT'])
 def add_new_row_staff_id():
+    """Adds a new entry in daily_form database"""
     try:
         if not request.is_json:
             return "bad request"
@@ -347,7 +348,9 @@ def add_new_row_staff_id():
     except Exception as e:
         return str(e)
 
-
+"""============================================================
+                            Delete Methods
+============================================================"""
 @app.route('/api/daily_form/delete_entry/<entry_to_delete>', methods=['DELETE'])
 def delete_entry_by_id(entry_to_delete):
     try:
