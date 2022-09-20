@@ -10,31 +10,14 @@ from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import JSON, false
 from os import getenv
-
 from sqlalchemy.orm import polymorphic_union
 
-"""
-FUNCTIONS
-"""
 
-def read_config(file_path):
-    dictionary = dict()
-    # if more than 1 section is needed, create a dict of dicts
-    dict_list = list()
-    config = configparser.ConfigParser()
-    config.read(file_path)
-    for section in config.sections():
-        for key in config[section]:
-            dictionary[key] = config[section][key]
-    return (dictionary)
-
-
-"""
-MAIN
-"""
+"""============================================================
+                                 MAIN
+============================================================"""
 
 app = Flask(__name__)
-#conf_dict = read_config("db_conn.config")
 app.config.update(
     ENV='development',
     SQLALCHEMY_DATABASE_URI=getenv('SERVER_URI', None),
@@ -45,9 +28,10 @@ app.config.update(
 CORS(app)
 db = SQLAlchemy(app)
 
-"""
-Models:
-"""
+
+"""============================================================
+                                MODELS
+============================================================"""
 
 
 @dataclass
@@ -95,9 +79,9 @@ class DailyForm(db.Model):
         return f"<DailyForm {id}>"
 
 
-"""
-Routes:
-"""
+"""============================================================
+                               Routes:
+============================================================"""
 
 
 @app.route('/')
@@ -120,6 +104,7 @@ def get_all_staff_list():
         all_staff_list = Staff.query.order_by(Staff.name.asc()).all()
         #print("here" + str(all_staff_list), flush=True)
         return jsonify(all_staff_list)
+
     except Exception as e:
         print("Error: " + str(e), flush=True)
         return str(e)
@@ -131,6 +116,7 @@ def staf_by_id(id):
     try:
         staff = Staff.query.filter_by(id=id).first()
         return jsonify(staff)
+
     except:
         return ("resource not found")
 
@@ -162,8 +148,8 @@ def get_day_by_day_str(day):
             }
             response_list.append(res)
         return jsonify(response_list)
+
     except Exception as e:
-        #print("Error: " + str(e))
         return "Exception: " + str(e)
 
 @app.route('/api/daily_form/row_id/<row_id>', methods=['get'])
@@ -194,6 +180,7 @@ def get_day_by_id(row_id):
 
         #print("new dict: " + str(res), flush=True)
         return jsonify(res)
+
     except Exception as e:
         print("Error: " + str(e), flush=True)
 
@@ -222,6 +209,7 @@ def all_days():
             response_list.append(res)
         #print("new dict: " + str(response_list), flush=True)
         return jsonify(response_list)
+
     except Exception as e:
         print("Error: " + str(e), flush=True)
 
@@ -244,6 +232,7 @@ def add_room():
         db.session.add(daily_form)
         db.session.commit()
         return "ok"
+
     except:
         return "Bad request"
 
@@ -282,6 +271,7 @@ def time_in_out():
         db.session.add(daily_form)
         db.session.commit()
         return "ok"
+
     except Exception as e:
         print("Error: " + str(e), flush=True)
         return ("Error: " + str(e))
@@ -303,6 +293,7 @@ def add_tag():
         # db.session.merge(daily_form)
         db.session.commit()
         return "ok"
+
     except Exception as e:
         print("bad request: " + str(e), flush=True)
         return "bad request"
@@ -319,7 +310,6 @@ def tag_ret():
     row_id = request_json['id']
     print(request_json, flush=True)
     try:
-        #daily_form = DailyForm(id=row_id, tag_ret=request_json['tag_ret'])
         daily_form = DailyForm.query.filter_by(id=row_id).first()
         daily_form.tag_ret = request_json['tag_ret']
         db.session.add(daily_form)
@@ -343,8 +333,7 @@ def add_new_row_staff_id():
         db.session.add(add_new_entry)
         db.session.commit()
         return "ok"
-        print()
-        return ""
+
     except Exception as e:
         return str(e)
 
