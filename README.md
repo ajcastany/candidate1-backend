@@ -2,6 +2,31 @@
 
 This is a Flask webserver with SQLAlchemy library for interacting with the postgres database.  It serves the API for the CandidateApp frontend.
 
+## PostgreSQL
+
+This api connects to a PostgreSQL db with two tables: **staff** and **daily_form**:
+
+### `staff` table columns:
+
+| Column     | Data type                        |
+|------------|----------------------------------|
+| id         | Primary Key, auto-increment, int |
+| name       | varchar(50)                      |
+| department | varchar(50)                      |
+
+### `daily_form` table columns:
+
+| Column   | Data type                        |
+|----------|----------------------------------|
+| id       | Primary Key, auto-increment, int |
+| day      | date                             |
+| name     | Foreign key, ref staff(id), int  |
+| room     | varchar(10)                      |
+| time_in  | time                             |
+| time)out | time                             |
+| tag      | varchar(10)                      |
+| tag_ret  | boolean                          |
+
 ## API endpoints:
 
 #### GET
