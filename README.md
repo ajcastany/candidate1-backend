@@ -44,7 +44,7 @@ This api connects to a PostgreSQL db with two tables: **staff** and **daily_form
 - `/api/daily_form/tag_ret` posts boolean tag_ret on row id from json request.
 
 #### PUT
-- `/api/daily_form/add_new_entry` creates a new entry from json request on database
+- `/api/daily_form/add_new_entry` creates a new daily form entry from json request on table `daily_form`.
 
 #### DELETE
 - `/api/daily_form/delete_entry/{entry_to_delete}` deletes row where id == `{entry_to_delete}`.
